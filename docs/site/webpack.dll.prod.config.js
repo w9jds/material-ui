@@ -5,10 +5,17 @@ const webpack = require('webpack');
 const packageJson = require('./package.json');
 const packageJsonSrc = require('../../package.json');
 
+const excludedDeps = [
+  'lodash', 'recompose', 'object-assign',
+];
+
 const deps = []
   .concat(Object.keys(packageJson.dependencies))
   .concat(Object.keys(packageJsonSrc.dependencies))
-  .concat(Object.keys(packageJsonSrc.peerDependencies));
+  .concat(Object.keys(packageJsonSrc.peerDependencies))
+  .filter((dep) => {
+    return excludedDeps.indexOf(dep) === -1;
+  });
 
 module.exports = {
   entry: {
