@@ -3,7 +3,7 @@
 const path = require('path');
 
 const libraryName = 'material-ui';
-const outputFile = `${libraryName}.js`;
+const outputFile = `${libraryName}.min.js`;
 const INDEX = path.join(__dirname, 'src/index.js');
 const DIST = path.join(__dirname, 'dist');
 
@@ -43,7 +43,7 @@ const config = {
     loaders: [
       {
         test: /\.js$/,
-        loader: 'babel',
+        loader: 'babel-loader',
         exclude: /(node_modules)/,
         query: {
           cacheDirectory: true,
@@ -52,8 +52,10 @@ const config = {
     ],
   },
   resolve: {
-    root: path.resolve('./src'),
-    extensions: ['', '.js'],
+    modules: [
+      path.resolve(__dirname, 'src'),
+      'node_modules',
+    ],
   },
 };
 
