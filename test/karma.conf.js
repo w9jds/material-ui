@@ -49,7 +49,7 @@ module.exports = function setKarmaConfig(config) {
         loaders: [
           {
             test: /\.js$/,
-            loader: 'babel',
+            loader: 'babel-loader',
             exclude: /node_modules/,
             query: {
               cacheDirectory: true,
@@ -57,7 +57,7 @@ module.exports = function setKarmaConfig(config) {
           },
           {
             test: /\.json$/,
-            loader: 'json',
+            loader: 'json-loader',
           },
         ],
         noParse: [
@@ -69,8 +69,7 @@ module.exports = function setKarmaConfig(config) {
           'material-ui': path.resolve(__dirname, '../src'),
           sinon: 'sinon/pkg/sinon.js',
         },
-        extensions: ['', '.js', '.jsx', '.json'],
-        modulesDirectories: [
+        modules: [
           'node_modules',
           './',
         ],
