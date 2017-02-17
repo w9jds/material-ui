@@ -13,6 +13,10 @@ class TableBody extends Component {
      */
     allRowsSelected: PropTypes.bool,
     /**
+     * Set the list of index values for the selected rows
+     */
+    selectedRows: PropTypes.array,
+    /**
      * Children passed to table body.
      */
     children: PropTypes.node,
@@ -113,6 +117,7 @@ class TableBody extends Component {
     multiSelectable: false,
     preScanRows: true,
     selectable: true,
+    selectedRows: [],
     style: {},
   };
 
@@ -137,6 +142,12 @@ class TableBody extends Component {
       } else {
         this.setState({
           selectedRows: this.calculatePreselectedRows(nextProps),
+        });
+      }
+    } else {
+      if (nextProps.selectedRows) {
+        this.setState({
+          selectedRows: nextProps.selectedRows
         });
       }
     }
