@@ -1,4 +1,5 @@
-import React, {Component, PropTypes} from 'react';
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';
 import {createChildFragment} from '../utils/childUtils';
 import Events from '../utils/events';
 import keycode from 'keycode';
@@ -97,7 +98,7 @@ class EnhancedButton extends Component {
     injectStyle();
     listenForTabPresses();
     if (this.state.isKeyboardFocused) {
-      this.refs.enhancedButton.focus();
+      this.button.focus();
       this.props.onKeyboardFocus(null, true);
     }
   }
@@ -316,7 +317,7 @@ class EnhancedButton extends Component {
     const buttonProps = {
       ...other,
       style: prepareStyles(mergedStyles),
-      ref: 'enhancedButton',
+      ref: (node) => this.button = node,
       disabled: disabled,
       href: href,
       onBlur: this.handleBlur,

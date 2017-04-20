@@ -1,4 +1,5 @@
-import React, {PropTypes} from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import transitions from '../styles/transitions';
 import withWidth, {SMALL} from '../utils/withWidth';
 import FlatButton from '../FlatButton';
@@ -23,6 +24,7 @@ function getStyles(props, context) {
         textColor,
         actionColor,
       },
+      borderRadius,
     },
   } = context;
 
@@ -35,7 +37,7 @@ function getStyles(props, context) {
       padding: `0 ${desktopGutter}px`,
       height: desktopSubheaderHeight,
       lineHeight: `${desktopSubheaderHeight}px`,
-      borderRadius: isSmall ? 0 : 2,
+      borderRadius: isSmall ? 0 : borderRadius,
       maxWidth: isSmall ? 'inherit' : 568,
       minWidth: isSmall ? 'inherit' : 288,
       width: isSmall ? `calc(100vw - ${desktopGutter * 2}px)` : 'auto',

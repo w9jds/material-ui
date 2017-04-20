@@ -1,4 +1,5 @@
-import React, {Component, PropTypes} from 'react';
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';
 import transitions from '../styles/transitions';
 import {createChildFragment} from '../utils/childUtils';
 import {fade} from '../utils/colorManipulator';
@@ -31,6 +32,25 @@ class FlatButton extends Component {
      * applies to flat and raised buttons.
      */
     children: PropTypes.node,
+    /**
+     * The CSS class name of the root element.
+     */
+    className: PropTypes.string,
+    /**
+     * The element to use as the container for the FlatButton. Either a string to
+     * use a DOM element or a ReactElement. This is useful for wrapping the
+     * FlatButton in a custom Link component. If a ReactElement is given, ensure
+     * that it passes all of its given props through to the underlying DOM
+     * element and renders its children prop for proper integration.
+     */
+    containerElement: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.element,
+    ]),
+    /**
+     * If true, the element's ripple effect will be disabled.
+     */
+    disableTouchRipple: PropTypes.bool,
     /**
      * Disables the button if set to true.
      */
@@ -79,6 +99,12 @@ class FlatButton extends Component {
     onMouseLeave: PropTypes.func,
     /** @ignore */
     onTouchStart: PropTypes.func,
+    /**
+     * Callback function fired when the button is touch-tapped.
+     *
+     * @param {object} event TouchTap event targeting the button.
+     */
+    onTouchTap: PropTypes.func,
     /**
      * If true, colors button according to
      * primaryTextColor from the Theme.
@@ -170,6 +196,7 @@ class FlatButton extends Component {
     } = this.props;
 
     const {
+      borderRadius,
       button: {
         height: buttonHeight,
         minWidth: buttonMinWidth,
@@ -205,7 +232,7 @@ class FlatButton extends Component {
       minWidth: fullWidth ? '100%' : buttonMinWidth,
       color: defaultTextColor,
       transition: transitions.easeOut(),
-      borderRadius: 2,
+      borderRadius,
       userSelect: 'none',
       overflow: 'hidden',
       backgroundColor: hovered ? buttonHoverColor : buttonBackgroundColor,

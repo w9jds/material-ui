@@ -1,4 +1,5 @@
-import React, {Component, PropTypes} from 'react';
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';
 import transitions from '../styles/transitions';
 import {fade} from '../utils/colorManipulator';
 import EnhancedButton from '../internal/EnhancedButton';
@@ -119,6 +120,12 @@ class FloatingActionButton extends Component {
     onTouchEnd: PropTypes.func,
     /** @ignore */
     onTouchStart: PropTypes.func,
+    /**
+     * Callback function fired when the button is touch-tapped.
+     *
+     * @param {object} event TouchTap event targeting the button.
+     */
+    onTouchTap: PropTypes.func,
     /**
      * If true, the button will use the secondary button colors.
      */
@@ -246,6 +253,7 @@ class FloatingActionButton extends Component {
       className,
       children: childrenProp,
       disabled,
+      disabledColor, // eslint-disable-line no-unused-vars
       mini,
       secondary, // eslint-disable-line no-unused-vars
       iconStyle,

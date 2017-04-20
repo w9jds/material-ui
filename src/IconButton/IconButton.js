@@ -1,4 +1,5 @@
-import React, {Component, PropTypes} from 'react';
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';
 import transitions from '../styles/transitions';
 import propTypes from '../utils/propTypes';
 import EnhancedButton from '../internal/EnhancedButton';
@@ -86,6 +87,12 @@ class IconButton extends Component {
     onMouseOut: PropTypes.func,
     /** @ignore */
     onTouchStart: PropTypes.func,
+    /**
+     * Callback function fired when the button is touch-tapped.
+     *
+     * @param {object} event TouchTap event targeting the button.
+     */
+    onTouchTap: PropTypes.func,
     /**
      * Override the inline-styles of the root element.
      */

@@ -1,10 +1,12 @@
-import React, {Component, PropTypes} from 'react';
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 import shallowEqual from 'recompose/shallowEqual';
 import Popover from '../Popover/Popover';
 import CheckIcon from '../svg-icons/navigation/check';
 import ListItem from '../List/ListItem';
 import Menu from '../Menu/Menu';
+import propTypes from '../utils/propTypes';
 
 const nestedMenuStyle = {
   position: 'relative',
@@ -58,6 +60,11 @@ class MenuItem extends Component {
   static muiName = 'MenuItem';
 
   static propTypes = {
+    /**
+     * Location of the anchor for the popover of nested `MenuItem`
+     * elements.
+     */
+    anchorOrigin: propTypes.origin,
     /**
      * Override the default animation component used.
      */
@@ -135,6 +142,7 @@ class MenuItem extends Component {
   };
 
   static defaultProps = {
+    anchorOrigin: {horizontal: 'right', vertical: 'top'},
     checked: false,
     desktop: false,
     disabled: false,
@@ -233,6 +241,7 @@ class MenuItem extends Component {
       secondaryText,
       style,
       animation,
+      anchorOrigin,
       value, // eslint-disable-line no-unused-vars
       ...other
     } = this.props;
@@ -274,7 +283,7 @@ class MenuItem extends Component {
       childMenuPopover = (
         <Popover
           animation={animation}
-          anchorOrigin={{horizontal: 'right', vertical: 'top'}}
+          anchorOrigin={anchorOrigin}
           anchorEl={this.state.anchorEl}
           open={this.state.open}
           useLayerForClickAway={false}
@@ -298,6 +307,7 @@ class MenuItem extends Component {
         leftIcon={leftIconElement}
         ref="listItem"
         rightIcon={rightIconElement}
+        role="menuitem"
         style={mergedRootStyles}
       >
         {children}

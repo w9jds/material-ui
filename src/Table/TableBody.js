@@ -1,4 +1,5 @@
-import React, {Component, PropTypes} from 'react';
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';
 import Checkbox from '../Checkbox';
 import TableRowColumn from './TableRowColumn';
 import ClickAwayListener from '../internal/ClickAwayListener';
@@ -75,7 +76,7 @@ class TableBody extends Component {
     /**
      * @ignore
      * Called when a row is selected. selectedRows is an
-     * array of all row selections. IF all rows have been selected,
+     * array of all row selections. If all rows have been selected,
      * the string "all" will be returned instead to indicate that
      * all rows have been selected.
      */
@@ -130,7 +131,9 @@ class TableBody extends Component {
   };
 
   componentWillMount() {
-    this.setState({selectedRows: this.calculatePreselectedRows(this.props)});
+    this.setState({
+      selectedRows: this.getSelectedRows(this.props),
+    });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -139,10 +142,7 @@ class TableBody extends Component {
         this.setState({
           selectedRows: [],
         });
-      } else {
-        this.setState({
-          selectedRows: this.calculatePreselectedRows(nextProps),
-        });
+        return;
       }
     } else {
       if (nextProps.selectedRows) {
@@ -151,15 +151,20 @@ class TableBody extends Component {
         });
       }
     }
+
+    this.setState({
+      selectedRows: this.getSelectedRows(nextProps),
+    });
   }
 
+  isControlled = false
+
   handleClickAway = () => {
-    if (this.props.deselectOnClickaway && this.state.selectedRows.length) {
-      this.setState({
-        selectedRows: [],
-      });
+    if (this.props.deselectOnClickaway && this.state.selectedRows.length > 0) {
+      const selectedRows = [];
+      this.setState({selectedRows});
       if (this.props.onRowSelection) {
-        this.props.onRowSelection([]);
+        this.props.onRowSelection(selectedRows);
       }
     }
   };
@@ -207,42 +212,41 @@ class TableBody extends Component {
       return null;
     }
 
-    const key = `${rowProps.rowNumber}-cb`;
+    const name = `${rowProps.rowNumber}-cb`;
     const disabled = !this.props.selectable;
-    const checkbox = (
-      <Checkbox
-        ref="rowSelectCB"
-        name={key}
-        value="selected"
-        disabled={disabled}
-        checked={rowProps.selected}
-      />
-    );
 
     return (
       <TableRowColumn
-        key={key}
+        key={name}
         columnNumber={0}
         style={{
           width: 24,
           cursor: disabled ? 'not-allowed' : 'inherit',
         }}
       >
-        {checkbox}
+        <Checkbox
+          name={name}
+          value="selected"
+          disabled={disabled}
+          checked={rowProps.selected}
+        />
       </TableRowColumn>
     );
   }
 
-  calculatePreselectedRows(props) {
-    // Determine what rows are 'pre-selected'.
-    const preSelectedRows = [];
+  getSelectedRows(props) {
+    const selectedRows = [];
 
     if (props.selectable && props.preScanRows) {
       let index = 0;
       React.Children.forEach(props.children, (child) => {
         if (React.isValidElement(child)) {
-          if (child.props.selected && (preSelectedRows.length === 0 || props.multiSelectable)) {
-            preSelectedRows.push(index);
+          if (child.props.selected !== undefined) {
+            this.isControlled = true;
+          }
+
+          if (child.props.selected && (selectedRows.length === 0 || props.multiSelectable)) {
+            selectedRows.push(index);
           }
 
           index++;
@@ -250,7 +254,7 @@ class TableBody extends Component {
       });
     }
 
-    return preSelectedRows;
+    return selectedRows;
   }
 
   isRowSelected(rowNumber) {
@@ -258,17 +262,19 @@ class TableBody extends Component {
       return true;
     }
 
-    for (let i = 0; i < this.state.selectedRows.length; i++) {
-      const selection = this.state.selectedRows[i];
-
-      if (typeof selection === 'object') {
-        if (this.isValueInRange(rowNumber, selection)) return true;
+    return this.state.selectedRows.some((row) => {
+      if (typeof row === 'object') {
+        if (this.isValueInRange(rowNumber, row)) {
+          return true;
+        }
       } else {
-        if (selection === rowNumber) return true;
+        if (row === rowNumber) {
+          return true;
+        }
       }
-    }
 
-    return false;
+      return false;
+    });
   }
 
   isValueInRange(value, range) {
@@ -292,16 +298,19 @@ class TableBody extends Component {
   };
 
   processRowSelection(event, rowNumber) {
-    let selectedRows = this.state.selectedRows;
+    let selectedRows = [...this.state.selectedRows];
 
-    if (event.shiftKey && this.props.multiSelectable && selectedRows.length) {
+    if (event.shiftKey && this.props.multiSelectable && selectedRows.length > 0) {
       const lastIndex = selectedRows.length - 1;
       const lastSelection = selectedRows[lastIndex];
 
       if (typeof lastSelection === 'object') {
         lastSelection.end = rowNumber;
       } else {
-        selectedRows.splice(lastIndex, 1, {start: lastSelection, end: rowNumber});
+        selectedRows.splice(lastIndex, 1, {
+          start: lastSelection,
+          end: rowNumber,
+        });
       }
     } else if (((event.ctrlKey && !event.metaKey) || (event.metaKey && !event.ctrlKey)) && this.props.multiSelectable) {
       const idx = selectedRows.indexOf(rowNumber);
@@ -330,8 +339,13 @@ class TableBody extends Component {
       }
     }
 
-    this.setState({selectedRows: selectedRows});
-    if (this.props.onRowSelection) this.props.onRowSelection(this.flattenRanges(selectedRows));
+    if (!this.isControlled) {
+      this.setState({selectedRows});
+    }
+
+    if (this.props.onRowSelection) {
+      this.props.onRowSelection(this.flattenRanges(selectedRows));
+    }
   }
 
   splitRange(range, splitPoint) {
@@ -360,17 +374,18 @@ class TableBody extends Component {
   }
 
   flattenRanges(selectedRows) {
-    const rows = [];
-    for (const selection of selectedRows) {
-      if (typeof selection === 'object') {
-        const values = this.genRangeOfValues(selection.end, selection.start - selection.end);
-        rows.push(selection.end, ...values);
-      } else {
-        rows.push(selection);
-      }
-    }
+    return selectedRows
+      .reduce((rows, row) => {
+        if (typeof row === 'object') {
+          const values = this.genRangeOfValues(row.end, row.start - row.end);
+          rows.push(row.end, ...values);
+        } else {
+          rows.push(row);
+        }
 
-    return rows.sort();
+        return rows;
+      }, [])
+      .sort();
   }
 
   onCellClick = (event, rowNumber, columnNumber) => {
@@ -417,15 +432,29 @@ class TableBody extends Component {
 
   render() {
     const {
-      className,
       style,
+      allRowsSelected, // eslint-disable-line no-unused-vars
+      multiSelectable, // eslint-disable-line no-unused-vars
+      onCellClick, // eslint-disable-line no-unused-vars
+      onCellHover, // eslint-disable-line no-unused-vars
+      onCellHoverExit, // eslint-disable-line no-unused-vars
+      onRowHover, // eslint-disable-line no-unused-vars
+      onRowHoverExit, // eslint-disable-line no-unused-vars
+      onRowSelection, // eslint-disable-line no-unused-vars
+      selectable, // eslint-disable-line no-unused-vars
+      deselectOnClickaway, // eslint-disable-line no-unused-vars
+      showRowHover, // eslint-disable-line no-unused-vars
+      stripedRows, // eslint-disable-line no-unused-vars
+      displayRowCheckbox, // eslint-disable-line no-unused-vars
+      preScanRows, // eslint-disable-line no-unused-vars
+      ...other
     } = this.props;
 
     const {prepareStyles} = this.context.muiTheme;
 
     return (
       <ClickAwayListener onClickAway={this.handleClickAway}>
-        <tbody className={className} style={prepareStyles(Object.assign({}, style))}>
+        <tbody style={prepareStyles(Object.assign({}, style))} {...other}>
           {this.createRows()}
         </tbody>
       </ClickAwayListener>
