@@ -14,10 +14,6 @@ class TableBody extends Component {
      */
     allRowsSelected: PropTypes.bool,
     /**
-     * Set the list of index values for the selected rows
-     */
-    selectedRows: PropTypes.array,
-    /**
      * Children passed to table body.
      */
     children: PropTypes.node,
@@ -95,6 +91,10 @@ class TableBody extends Component {
      */
     selectable: PropTypes.bool,
     /**
+     * Set the list of index values for the selected rows
+     */
+    selectedRows: PropTypes.array,
+    /**
      * If true, table rows will be highlighted when
      * the cursor is hovering over the row. The default
      * value is false.
@@ -144,12 +144,12 @@ class TableBody extends Component {
         });
         return;
       }
-    } else {
-      if (nextProps.selectedRows) {
-        this.setState({
-          selectedRows: nextProps.selectedRows
-        });
-      }
+    }
+
+    if (nextProps.selectedRows) {
+      this.setState({
+        selectedRows: nextProps.selectedRows,
+      });
     }
 
     this.setState({
