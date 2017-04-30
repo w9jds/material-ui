@@ -131,9 +131,19 @@ class TableBody extends Component {
   };
 
   componentWillMount() {
-    this.setState({
-      selectedRows: this.getSelectedRows(this.props),
-    });
+    if (this.props.preScanRows) {
+      this.setState({
+        selectedRows: this.getSelectedRows(this.props),
+      });
+    }
+  }
+
+  componentDidMount() {
+    if (!this.props.preScanRows) {
+      this.setState({ // eslint-disable-line react/no-did-mount-set-state
+        selectedRows: this.getSelectedRows(this.props),
+      });
+    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -221,7 +231,7 @@ class TableBody extends Component {
         columnNumber={0}
         style={{
           width: 24,
-          cursor: disabled ? 'not-allowed' : 'inherit',
+          cursor: disabled ? 'default' : 'inherit',
         }}
       >
         <Checkbox
@@ -237,7 +247,7 @@ class TableBody extends Component {
   getSelectedRows(props) {
     const selectedRows = [];
 
-    if (props.selectable && props.preScanRows) {
+    if (props.selectable) {
       let index = 0;
       React.Children.forEach(props.children, (child) => {
         if (React.isValidElement(child)) {
